@@ -2,7 +2,7 @@
   font-family: 'Space Mono';
   font-style: normal;
   font-weight: 400;
-  src: url('chrome-extension://__MSG_@@extension_id__/fonts/SpaceMono-Regular.woff2') format('woff2');
+  src: url('fonts/SpaceMono-Regular.woff2') format('woff2');
 }
 
 #overlay-container {
@@ -39,7 +39,7 @@
   width: 170px;
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Space Mono', serif;
   font-size: 12px;
 }
 
