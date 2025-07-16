@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'Space Mono';
-  src: url('fonts/SpaceMono-Regular.woff2') format('woff2');
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/SpaceMono-Regular.woff2') format('woff2');
 }
 
 #overlay-controls {
@@ -14,6 +14,7 @@
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
   font-family: 'Space Mono', serif;
   font-size: 12px;
+  color: black;
 }
 
 #overlay-controls-header {
@@ -59,6 +60,8 @@
 }
 .control-group input[type="number"], .control-group input[type="range"] {
   width: 100%;
+  font-family: 'Space Mono', serif;
+  font-size: 12px;
   box-sizing: border-box;
 }
 
@@ -126,23 +129,28 @@
   box-sizing: border-box;
   margin-top: 5px;
   padding: 8px;
+  font-family: 'Space Mono', serif;
+  font-size: 12px;
   background-color: transparent;
   border: 1px solid black !important;
   cursor: pointer;
 }
 
 #overlay-controls button {
+  color: black;
   border: none;
   cursor: pointer;
 }
 
 #overlay-controls-header button {
+  color: black;
   background-color: transparent;
   padding: 0;
   cursor: pointer;
 }
 
 #overlay-controls input[type="number"] {
+  color: black;
   background-color: transparent;
   padding: 2px 0;
   border: none;
