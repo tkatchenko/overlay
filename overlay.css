@@ -42,11 +42,15 @@
   padding: 5px;
   display: flex;
   align-items: center;
-  gap: 5px;
   cursor: grab;
-  justify-content: flex-end;
+  justify-content: space-between;
 }
-#pixel-perfect-controls-header:active {
+#overlay-controls-header > div {
+  display: flex;
+  gap: 5px;
+}
+
+#overlay-controls-header:active {
   cursor: grabbing;
 }
 

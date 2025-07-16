@@ -48,9 +48,12 @@
 
   controls.innerHTML = `
     <div id="overlay-controls-header">
-      <button id="lockBtn" title="Lock/Unlock Image">🔒</button>
-      <button id="hideBtn" title="Hide/Show Image">👁️</button>
-      <button id="minBtn" title="Minimize/Restore Panel">➖</button>
+      <span>Overlay</span>
+      <div>
+        <button id="lockBtn" title="Lock/Unlock Image">🔒</button>
+        <button id="hideBtn" title="Hide/Show Image">👁️</button>
+        <button id="minBtn" title="Minimize/Restore Panel">➖</button>
+      </div>
     </div>
     <div id="overlay-controls-body">
       <div class="control-group">
