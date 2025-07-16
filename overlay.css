@@ -92,7 +92,6 @@
   cursor: pointer;
 }
 .image-list-item {
-  border-bottom: 1px solid black;
 }
 .image-list-item:last-child {
   border-bottom: none;
@@ -103,7 +102,7 @@
 .image-list-item img {
   width: 32px;
   height: 32px;
-  object-fit: cover;
+  object-fit: contain;
   margin-right: 5px;
 }
 .image-list-item span {
