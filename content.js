@@ -31,11 +31,11 @@
   const overlayContainer = document.createElement('div');
   overlayContainer.id = OVERLAY_ID;
   Object.assign(overlayContainer.style, {
-    position: 'fixed',
+    position: 'absolute',
     top: '0',
     left: '0',
     width: '100%',
-    height: '100%',
+    height: `${document.documentElement.scrollHeight}px`,
     zIndex: '2147483646',
     pointerEvents: 'none'
   });
@@ -274,12 +274,12 @@
     if (state.settings.locked) return;
     
     e.preventDefault();
-    const startX = e.clientX - state.settings.x;
-    const startY = e.clientY - state.settings.y;
+    const startX = e.pageX - state.settings.x;
+    const startY = e.pageY - state.settings.y;
 
     function onMouseMove(moveEvent) {
-      state.settings.x = moveEvent.clientX - startX;
-      state.settings.y = moveEvent.clientY - startY;
+      state.settings.x = moveEvent.pageX - startX;
+      state.settings.y = moveEvent.pageY - startY;
       updateOverlayStyle();
       updateControlsUI();
     }
