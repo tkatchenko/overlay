@@ -132,6 +132,7 @@
     controls.style.top = `${state.panel.top}px`;
     controls.style.right = `${state.panel.right}px`;
     controls.classList.toggle('minimized', state.panel.minimized);
+    DOMElements.minBtn.textContent = state.panel.minimized ? '➕' : '➖';
   }
 
   function renderImageList() {
@@ -221,7 +222,7 @@
   
   DOMElements.lockBtn.addEventListener('click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
   DOMElements.hideBtn.addEventListener('click', () => { state.settings.hidden = !state.settings.hidden; updateOverlayStyle(); saveState(); });
-  DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; controls.classList.toggle('minimized'); saveState(); });
+  DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; updateControlsUI(); saveState(); });
 
   DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
   DOMElements.imageUpload.addEventListener('change', (e) => {

@@ -35,7 +35,7 @@
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
   font-family: 'Space Mono', monospace;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 #overlay-controls-header {
@@ -93,11 +93,14 @@
   padding: 2px;
   cursor: pointer;
 }
-.image-list-item:hover {
-  background: #eee;
+.image-list-item {
+  border-bottom: 1px solid black;
+}
+.image-list-item:last-child {
+  border-bottom: none;
 }
 .image-list-item.active {
-  background: #ccc;
+  font-weight: bold;
 }
 .image-list-item img {
   width: 32px;
@@ -127,10 +130,12 @@
   width: 100%;
   box-sizing: border-box;
   margin-top: 4px;
+  padding: 8px;
+  background-color: transparent;
+  border: 1px solid black;
 }
 
-#overlay-controls button,
-#overlay-controls input[type="number"] {
+#overlay-controls button {
   border: none;
   border-radius: 0;
 }
@@ -139,8 +144,32 @@
   background-color: transparent;
 }
 
-#uploadBtn,
 #overlay-controls input[type="number"] {
-  background-color: #f0f0f0;
+  background-color: transparent;
   padding: 2px 4px;
+  border: none;
+  border-radius: 0;
+  border-bottom: 1px solid black;
+}
+
+/* Custom Range Slider Styles */
+input[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+  width: 100%;
+  cursor: pointer;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  height: 1px;
+  background: black;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 5px;
+  height: 5px;
+  background: black;
+  margin-top: -2px; /* Center thumb on track */
 }
