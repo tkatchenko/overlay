@@ -2,7 +2,7 @@
   const OVERLAY_ID = 'overlay-container';
   const SHADOW_HOST_ID = 'overlay-shadow-host';
   const CONTROLS_ID = 'overlay-controls';
-  const storageKey = `overlayState:${window.location.origin}${window.location.pathname}`;
+  const storageKey = `overlayState:${window.location.origin}`;
 
   let state = {
     images: [],
