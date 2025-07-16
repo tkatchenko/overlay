@@ -2,6 +2,7 @@
   const OVERLAY_ID = 'overlay-container';
   const SHADOW_HOST_ID = 'overlay-shadow-host';
   const CONTROLS_ID = 'overlay-controls';
+  const storageKey = `overlayState:${window.location.origin}${window.location.pathname}`;
 
   let state = {
     images: [],
@@ -200,13 +201,13 @@
   }
 
   function saveState() {
-    chrome.storage.local.set({ overlayState: state });
+    chrome.storage.local.set({ [storageKey]: state });
   }
 
   function loadStateAndInitialize() {
-    chrome.storage.local.get('overlayState', (result) => {
-      if (result.overlayState) {
-        const loadedState = result.overlayState;
+    chrome.storage.local.get(storageKey, (result) => {
+      if (result[storageKey]) {
+        const loadedState = result[storageKey];
         state.settings = { ...state.settings, ...loadedState.settings };
         state.panel = { ...state.panel, ...loadedState.panel };
         state.images = loadedState.images || [];
