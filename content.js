@@ -260,8 +260,17 @@
       }
 
       item.addEventListener('click', () => {
+        if (state.activeImageId === img.id) return;
+
+        const previousActiveId = state.activeImageId;
         state.activeImageId = img.id;
         console.log('Image list item clicked. New activeImageId:', img.id);
+
+        if (previousActiveId) {
+          const previousActiveItem = DOMElements.imageList.querySelector(`[data-id='${previousActiveId}']`);
+          if (previousActiveItem) previousActiveItem.classList.remove('active');
+        }
+        item.classList.add('active');
 
         getImageFromDB(img.id).then(imageRecord => {
           if(imageRecord) {
@@ -274,7 +283,6 @@
         }).catch(console.error);
 
         updateOverlayStyle();
-        renderImageList();
         saveState();
       });
 
