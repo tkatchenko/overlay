@@ -1,4 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+@font-face {
+  font-family: 'Space Mono';
+  src: url('fonts/SpaceMono-Regular.woff2') format('woff2');
+}
 
 #overlay-controls {
   position: fixed;
@@ -9,7 +12,7 @@
   width: 170px;
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
-  font-family: 'Space Mono', monospace;
+  font-family: 'Space Mono', sans-serif;
   font-size: 12px;
 }
 
