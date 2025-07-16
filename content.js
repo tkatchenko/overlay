@@ -59,15 +59,6 @@
   document.body.appendChild(overlayContainer);
   shadowRoot.appendChild(controls);
 
-  const fontFaceStyle = document.createElement('style');
-  fontFaceStyle.textContent = `
-    @font-face {
-      font-family: 'Space Mono';
-      src: url('${chrome.runtime.getURL('fonts/SpaceMono-Regular.woff2')}') format('woff2');
-    }
-  `;
-  shadowRoot.appendChild(fontFaceStyle);
-
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
