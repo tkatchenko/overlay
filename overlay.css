@@ -1,4 +1,4 @@
-#pixel-perfect-overlay-container {
+#overlay-container {
   position: fixed;
   top: 0;
   left: 0;
@@ -8,12 +8,12 @@
   pointer-events: none; /* Default to allow clicking through */
 }
 
-#pixel-perfect-overlay-container.draggable {
+#overlay-container.draggable {
   pointer-events: auto;
   cursor: move;
 }
 
-#pixel-perfect-overlay-image {
+#overlay-image {
   position: absolute;
   top: 50px;
   left: 50px;
@@ -23,7 +23,7 @@
   filter: invert(0);
 }
 
-#pixel-perfect-controls {
+#overlay-controls {
   position: fixed;
   top: 20px;
   right: 20px;
@@ -34,7 +34,7 @@
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
-#pixel-perfect-controls-header {
+#overlay-controls-header {
   padding: 4px;
   display: flex;
   align-items: center;
@@ -47,10 +47,10 @@
 }
 
 
-#pixel-perfect-controls-body {
+#overlay-controls-body {
   padding: 4px;
 }
-#pixel-perfect-controls.minimized #pixel-perfect-controls-body {
+#overlay-controls.minimized #overlay-controls-body {
   display: none;
 }
 
@@ -126,18 +126,18 @@
 }
 
 /* Remove borders and rounded corners from controls */
-#pixel-perfect-controls button,
-#pixel-perfect-controls input[type="number"] {
+#overlay-controls button,
+#overlay-controls input[type="number"] {
   border: none;
   border-radius: 0;
 }
 
-#pixel-perfect-controls-header button {
+#overlay-controls-header button {
   background-color: transparent; /* Makes them look like icons */
 }
 
 #uploadBtn,
-#pixel-perfect-controls input[type="number"] {
+#overlay-controls input[type="number"] {
   background-color: #f0f0f0; /* So they are visible on white panel */
   padding: 2px 4px;
 }

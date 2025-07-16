@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "Pixel Perfect Overlay",
+  "name": "Overlay",
   "version": "1.0",
-  "description": "Overlay an image on a website to help with design implementation.",
+  "description": "Overlay an image on a website.",
   "permissions": ["storage", "scripting"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Toggle Pixel Perfect Overlay"
+    "default_title": "Toggle Overlay"
   },
   "icons": {
     "16": "icons/icon16.png",

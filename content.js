@@ -1,8 +1,8 @@
 (() => {
   // --- A. INITIALIZATION & SETUP ---
 
-  const OVERLAY_ID = 'pixel-perfect-overlay-container';
-  const CONTROLS_ID = 'pixel-perfect-controls';
+  const OVERLAY_ID = 'overlay-container';
+  const CONTROLS_ID = 'overlay-controls';
 
   // State to hold all our data
   let state = {
@@ -36,7 +36,7 @@
   overlayContainer.id = OVERLAY_ID;
 
   const overlayImage = document.createElement('img');
-  overlayImage.id = 'pixel-perfect-overlay-image';
+  overlayImage.id = 'overlay-image';
   overlayContainer.appendChild(overlayImage);
 
   const controls = document.createElement('div');
@@ -56,12 +56,12 @@
 
   // HTML for the control panel
   controls.innerHTML = `
-    <div id="pixel-perfect-controls-header">
+    <div id="overlay-controls-header">
       <button id="lockBtn" title="Lock/Unlock Image">🔒</button>
       <button id="hideBtn" title="Hide/Show Image">👁️</button>
       <button id="minBtn" title="Minimize/Restore Panel">➖</button>
     </div>
-    <div id="pixel-perfect-controls-body">
+    <div id="overlay-controls-body">
       <div class="control-group">
         <div class="input-row">
           <div><label>X</label><input type="number" id="xPos" step="1"></div>
@@ -114,8 +114,8 @@
     imageUpload: document.getElementById('imageUpload'),
     uploadBtn: document.getElementById('uploadBtn'),
     imageList: document.getElementById('image-list-container'),
-    controlsHeader: document.getElementById('pixel-perfect-controls-header'),
-    controlsBody: document.getElementById('pixel-perfect-controls-body')
+    controlsHeader: document.getElementById('overlay-controls-header'),
+    controlsBody: document.getElementById('overlay-controls-body')
   };
 
   // --- C. CORE LOGIC & EVENT HANDLERS ---
@@ -193,15 +193,15 @@
 
   /** Saves the current state to chrome.storage */
   function saveState() {
-    chrome.storage.local.set({ pixelPerfectState: state });
+    chrome.storage.local.set({ overlayState: state });
   }
 
   /** Loads state from chrome.storage and initializes the extension */
   function loadStateAndInitialize() {
-    chrome.storage.local.get('pixelPerfectState', (result) => {
-      if (result.pixelPerfectState) {
+    chrome.storage.local.get('overlayState', (result) => {
+      if (result.overlayState) {
         // Merge saved state with default state to prevent errors on new features
-        const loadedState = result.pixelPerfectState;
+        const loadedState = result.overlayState;
         state.settings = { ...state.settings, ...loadedState.settings };
         state.panel = { ...state.panel, ...loadedState.panel };
         state.images = loadedState.images || [];
