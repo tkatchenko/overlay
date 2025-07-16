@@ -124,3 +124,20 @@
   box-sizing: border-box;
   margin-top: 4px;
 }
+
+/* Remove borders and rounded corners from controls */
+#pixel-perfect-controls button,
+#pixel-perfect-controls input[type="number"] {
+  border: none;
+  border-radius: 0;
+}
+
+#pixel-perfect-controls-header button {
+  background-color: transparent; /* Makes them look like icons */
+}
+
+#uploadBtn,
+#pixel-perfect-controls input[type="number"] {
+  background-color: #f0f0f0; /* So they are visible on white panel */
+  padding: 2px 4px;
+}
