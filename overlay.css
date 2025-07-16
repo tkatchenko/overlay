@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+
 #overlay-container {
   position: fixed;
   top: 0;
@@ -32,6 +34,8 @@
   width: 170px;
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
 }
 
 #overlay-controls-header {

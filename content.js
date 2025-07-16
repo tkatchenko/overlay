@@ -117,7 +117,7 @@
     overlayImage.style.display = state.settings.hidden ? 'none' : 'block';
     
     overlayContainer.classList.toggle('draggable', !state.settings.locked);
-    DOMElements.lockBtn.textContent = state.settings.locked ? '🔓' : '🔒';
+    DOMElements.lockBtn.textContent = state.settings.locked ? '🔒' : '🔓';
   }
 
   function updateControlsUI() {
