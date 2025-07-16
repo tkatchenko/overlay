@@ -231,6 +231,7 @@
       
       const thumb = document.createElement('img');
       thumb.alt = 'thumb';
+      thumb.style.visibility = 'hidden';
       const nameSpan = document.createElement('span');
       nameSpan.textContent = img.name;
       const deleteBtn = document.createElement('button');
@@ -246,7 +247,10 @@
         if (imageRecord) {
           const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
           thumb.src = URL.createObjectURL(blob);
-          thumb.onload = () => URL.revokeObjectURL(thumb.src);
+          thumb.onload = () => {
+            thumb.style.visibility = 'visible';
+            URL.revokeObjectURL(thumb.src);
+          };
         }
       }).catch(console.error);
 
