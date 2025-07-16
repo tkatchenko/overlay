@@ -71,8 +71,8 @@
       <div class="control-group">
         <label>Scale</label>
         <div class="input-row">
-          <div><input type="range" id="scaleRange" min="0.1" max="3" step="0.05"></div>
-          <div><input type="number" id="scaleNumber" min="0.1" max="3" step="0.05"></div>
+          <div><input type="range" id="scaleRange" min="0" max="2" step="0.05"></div>
+          <div><input type="number" id="scaleNumber" min="0" max="2" step="0.05"></div>
         </div>
       </div>
       <div class="control-group">
