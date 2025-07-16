@@ -4,6 +4,7 @@
   const CONTROLS_ID = 'overlay-controls';
   const storageKey = `overlayState:${window.location.origin}`;
 
+  let isLoaded = false;
   let state = {
     images: [],
     activeImageId: null,
@@ -202,6 +203,7 @@
   }
 
   function saveState() {
+    if (!isLoaded) return;
     chrome.storage.local.set({ [storageKey]: state });
   }
 
@@ -223,6 +225,7 @@
       updateOverlayStyle();
       updateControlsUI();
       renderImageList();
+      isLoaded = true;
     });
   }
 
