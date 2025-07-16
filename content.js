@@ -1,5 +1,6 @@
 (() => {
   const OVERLAY_ID = 'overlay-container';
+  const SHADOW_HOST_ID = 'overlay-shadow-host';
   const CONTROLS_ID = 'overlay-controls';
 
   let state = {
@@ -21,8 +22,8 @@
     }
   };
 
-  if (document.getElementById(CONTROLS_ID)) {
-    document.getElementById(CONTROLS_ID).remove();
+  if (document.getElementById(SHADOW_HOST_ID)) {
+    document.getElementById(SHADOW_HOST_ID).remove();
     document.getElementById(OVERLAY_ID).remove();
     return;
   }
@@ -34,17 +35,22 @@
   overlayImage.id = 'overlay-image';
   overlayContainer.appendChild(overlayImage);
 
+  const shadowHost = document.createElement('div');
+  shadowHost.id = SHADOW_HOST_ID;
+  document.body.appendChild(shadowHost);
+  const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+
   const controls = document.createElement('div');
   controls.id = CONTROLS_ID;
 
   document.body.appendChild(overlayContainer);
-  document.body.appendChild(controls);
+  shadowRoot.appendChild(controls);
 
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
   link.href = chrome.runtime.getURL('overlay.css');
-  document.head.appendChild(link);
+  shadowRoot.appendChild(link);
 
   controls.innerHTML = `
     <div id="overlay-controls-header">
@@ -93,22 +99,22 @@
   `;
 
   const DOMElements = {
-    lockBtn: document.getElementById('lockBtn'),
-    hideBtn: document.getElementById('hideBtn'),
-    minBtn: document.getElementById('minBtn'),
-    xPos: document.getElementById('xPos'),
-    yPos: document.getElementById('yPos'),
-    scaleRange: document.getElementById('scaleRange'),
-    scaleNumber: document.getElementById('scaleNumber'),
-    opacityRange: document.getElementById('opacityRange'),
-    opacityNumber: document.getElementById('opacityNumber'),
-    invertRange: document.getElementById('invertRange'),
-    invertNumber: document.getElementById('invertNumber'),
-    imageUpload: document.getElementById('imageUpload'),
-    uploadBtn: document.getElementById('uploadBtn'),
-    imageList: document.getElementById('image-list-container'),
-    controlsHeader: document.getElementById('overlay-controls-header'),
-    controlsBody: document.getElementById('overlay-controls-body')
+    lockBtn: shadowRoot.getElementById('lockBtn'),
+    hideBtn: shadowRoot.getElementById('hideBtn'),
+    minBtn: shadowRoot.getElementById('minBtn'),
+    xPos: shadowRoot.getElementById('xPos'),
+    yPos: shadowRoot.getElementById('yPos'),
+    scaleRange: shadowRoot.getElementById('scaleRange'),
+    scaleNumber: shadowRoot.getElementById('scaleNumber'),
+    opacityRange: shadowRoot.getElementById('opacityRange'),
+    opacityNumber: shadowRoot.getElementById('opacityNumber'),
+    invertRange: shadowRoot.getElementById('invertRange'),
+    invertNumber: shadowRoot.getElementById('invertNumber'),
+    imageUpload: shadowRoot.getElementById('imageUpload'),
+    uploadBtn: shadowRoot.getElementById('uploadBtn'),
+    imageList: shadowRoot.getElementById('image-list-container'),
+    controlsHeader: shadowRoot.getElementById('overlay-controls-header'),
+    controlsBody: shadowRoot.getElementById('overlay-controls-body')
   };
 
   function updateOverlayStyle() {
