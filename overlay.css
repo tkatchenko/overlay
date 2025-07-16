@@ -56,8 +56,8 @@
 
 
 #overlay-controls-body {
-  padding: 5px;
-  border-top: 1px solid black;
+  padding: 10px 5px;
+  border-top: 1px dashed black;
 }
 #overlay-controls.minimized #overlay-controls-body {
   display: none;
@@ -69,6 +69,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+.control-group.layers {
+  margin-top: 15px;
+  margin-bottom: 0;
 }
 .control-group label {
   font-weight: normal;
@@ -87,6 +91,12 @@
 .input-row > div {
   position: relative;
   flex: 1;
+}
+
+.input-row.xy label {
+  display: block;
+  margin: 0;
+  margin-bottom: 5px;
 }
 
 #image-list-container {
@@ -139,7 +149,7 @@
   margin-top: 5px;
   padding: 8px;
   background-color: transparent;
-  border: 1px solid black;
+  border: 1px solid black !important;
 }
 
 #overlay-controls button {
@@ -153,7 +163,7 @@
 
 #overlay-controls input[type="number"] {
   background-color: transparent;
-  padding: 2px 5px;
+  padding: 2px 0;
   border: none;
   border-radius: 0;
   border-bottom: 1px solid black;

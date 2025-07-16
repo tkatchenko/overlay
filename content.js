@@ -57,9 +57,9 @@
     </div>
     <div id="overlay-controls-body">
       <div class="control-group">
-        <div class="input-row">
-          <div><label>X</label><input type="number" id="xPos" step="1"></div>
-          <div><label>Y</label><input type="number" id="yPos" step="1"></div>
+        <div class="input-row xy">
+          <div><label>x</label><input type="number" id="xPos" step="1"></div>
+          <div><label>y</label><input type="number" id="yPos" step="1"></div>
         </div>
       </div>
       <div class="control-group">
@@ -83,7 +83,7 @@
           <div><input type="number" id="invertNumber" min="0" max="1" step="0.1"></div>
         </div>
       </div>
-      <div class="control-group">
+      <div class="control-group layers">
         <label>Layers</label>
         <div id="image-list-container"></div>
         <input type="file" id="imageUpload" accept="image/*" style="display: none;">
