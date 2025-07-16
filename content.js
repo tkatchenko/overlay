@@ -230,9 +230,14 @@
         item.classList.add('active');
       }
       
+      const thumbWrapper = document.createElement('div');
+      thumbWrapper.className = 'image-list-item-thumb';
+
       const thumb = document.createElement('img');
       thumb.alt = 'thumb';
       thumb.style.visibility = 'hidden';
+      thumbWrapper.appendChild(thumb);
+      
       const nameSpan = document.createElement('span');
       nameSpan.textContent = img.name;
       const deleteBtn = document.createElement('button');
@@ -240,7 +245,7 @@
       deleteBtn.title = 'Remove image';
       deleteBtn.innerHTML = '&times;';
       
-      item.appendChild(thumb);
+      item.appendChild(thumbWrapper);
       item.appendChild(nameSpan);
       item.appendChild(deleteBtn);
 
