@@ -6,18 +6,18 @@
     images: [],
     activeImageId: null,
     settings: {
-      x: 50,
-      y: 50,
+      x: 0,
+      y: 0,
       opacity: 0.5,
-      scale: 1,
-      invert: 0,
+      scale: 0.5,
+      invert: 1,
       locked: false,
       hidden: false,
     },
     panel: {
       minimized: false,
-      top: 20,
-      right: 20,
+      top: 0,
+      right: 0,
     }
   };
 
@@ -144,7 +144,7 @@
       if (img.id === state.activeImageId) {
         item.classList.add('active');
       }
-      item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span><button class="delete-img-btn" title="Remove image">✖</button>`;
+      item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span><button class="delete-img-btn" title="Remove image">×</button>`;
       item.addEventListener('click', () => {
         state.activeImageId = img.id;
         overlayImage.src = img.dataUrl;
