@@ -1,12 +1,9 @@
 (() => {
-  // --- A. INITIALIZATION & SETUP ---
-
   const OVERLAY_ID = 'overlay-container';
   const CONTROLS_ID = 'overlay-controls';
 
-  // State to hold all our data
   let state = {
-    images: [], // { id, name, dataUrl }
+    images: [],
     activeImageId: null,
     settings: {
       x: 50,
@@ -24,14 +21,12 @@
     }
   };
 
-  // If the controls already exist, the user is toggling the extension off.
   if (document.getElementById(CONTROLS_ID)) {
     document.getElementById(CONTROLS_ID).remove();
     document.getElementById(OVERLAY_ID).remove();
     return;
   }
 
-  // Create main overlay and controls containers
   const overlayContainer = document.createElement('div');
   overlayContainer.id = OVERLAY_ID;
 
@@ -45,16 +40,12 @@
   document.body.appendChild(overlayContainer);
   document.body.appendChild(controls);
 
-  // Inject CSS
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.type = 'text/css';
   link.href = chrome.runtime.getURL('overlay.css');
   document.head.appendChild(link);
 
-  // --- B. UI & DOM MANIPULATION ---
-
-  // HTML for the control panel
   controls.innerHTML = `
     <div id="overlay-controls-header">
       <button id="lockBtn" title="Lock/Unlock Image">🔒</button>
@@ -98,7 +89,6 @@
     </div>
   `;
 
-  // Get references to all control elements
   const DOMElements = {
     lockBtn: document.getElementById('lockBtn'),
     hideBtn: document.getElementById('hideBtn'),
@@ -118,9 +108,6 @@
     controlsBody: document.getElementById('overlay-controls-body')
   };
 
-  // --- C. CORE LOGIC & EVENT HANDLERS ---
-
-  /** Updates the overlay image style based on the current state */
   function updateOverlayStyle() {
     overlayImage.style.left = `${state.settings.x}px`;
     overlayImage.style.top = `${state.settings.y}px`;
@@ -133,7 +120,6 @@
     DOMElements.lockBtn.textContent = state.settings.locked ? '🔓' : '🔒';
   }
 
-  /** Updates the control panel UI inputs based on the current state */
   function updateControlsUI() {
     DOMElements.xPos.value = Math.round(state.settings.x);
     DOMElements.yPos.value = Math.round(state.settings.y);
@@ -148,7 +134,6 @@
     controls.classList.toggle('minimized', state.panel.minimized);
   }
 
-  /** Renders the list of images in the control panel */
   function renderImageList() {
     DOMElements.imageList.innerHTML = '';
     state.images.forEach(img => {
@@ -162,17 +147,15 @@
       item.addEventListener('click', () => {
         state.activeImageId = img.id;
         overlayImage.src = img.dataUrl;
-        renderImageList(); // Re-render to show active state
+        renderImageList();
         saveState();
       });
 
       item.querySelector('.delete-img-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         
-        // Remove image from state
         state.images = state.images.filter(i => i.id !== img.id);
         
-        // If the active image was deleted, handle it
         if (state.activeImageId === img.id) {
           if (state.images.length > 0) {
             state.activeImageId = state.images[0].id;
@@ -191,16 +174,13 @@
     });
   }
 
-  /** Saves the current state to chrome.storage */
   function saveState() {
     chrome.storage.local.set({ overlayState: state });
   }
 
-  /** Loads state from chrome.storage and initializes the extension */
   function loadStateAndInitialize() {
     chrome.storage.local.get('overlayState', (result) => {
       if (result.overlayState) {
-        // Merge saved state with default state to prevent errors on new features
         const loadedState = result.overlayState;
         state.settings = { ...state.settings, ...loadedState.settings };
         state.panel = { ...state.panel, ...loadedState.panel };
@@ -208,7 +188,6 @@
         state.activeImageId = loadedState.activeImageId || null;
       }
       
-      // After loading, apply everything
       const activeImage = state.images.find(img => img.id === state.activeImageId);
       if (activeImage) {
         overlayImage.src = activeImage.dataUrl;
@@ -220,9 +199,6 @@
     });
   }
 
-  // --- D. EVENT LISTENERS ---
-
-  // Control panel inputs
   DOMElements.xPos.addEventListener('input', (e) => { state.settings.x = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
   DOMElements.yPos.addEventListener('input', (e) => { state.settings.y = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
   
@@ -243,12 +219,10 @@
   setupSyncedInputs('opacity', DOMElements.opacityRange, DOMElements.opacityNumber);
   setupSyncedInputs('invert', DOMElements.invertRange, DOMElements.invertNumber);
   
-  // Header buttons
   DOMElements.lockBtn.addEventListener('click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
   DOMElements.hideBtn.addEventListener('click', () => { state.settings.hidden = !state.settings.hidden; updateOverlayStyle(); saveState(); });
   DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; controls.classList.toggle('minimized'); saveState(); });
 
-  // Image upload
   DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
   DOMElements.imageUpload.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -267,11 +241,10 @@
         saveState();
       };
       reader.readAsDataURL(file);
-      e.target.value = ''; // Reset file input
+      e.target.value = '';
     }
   });
 
-  // Dragging logic for the overlay image
   overlayContainer.addEventListener('mousedown', (e) => {
     if (state.settings.locked) return;
     
@@ -296,7 +269,6 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  // Dragging logic for the control panel
   DOMElements.controlsHeader.addEventListener('mousedown', (e) => {
     e.preventDefault();
     const rect = controls.getBoundingClientRect();
@@ -311,7 +283,6 @@
       state.panel.top = startTop + dy;
       state.panel.right = startRight - dx;
 
-      // Boundary checks
       if (state.panel.top < 0) state.panel.top = 0;
       if (state.panel.right < 0) state.panel.right = 0;
       if (state.panel.top > window.innerHeight - controls.offsetHeight) state.panel.top = window.innerHeight - controls.offsetHeight;
@@ -331,12 +302,9 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  // Keyboard navigation for the overlay image
   document.addEventListener('keydown', (e) => {
-    // Ignore if typing in an input
     if (e.target.tagName === 'INPUT') return;
 
-    // Ignore if no image is active or if it's locked
     if (!state.activeImageId || state.settings.locked) return;
 
     let moved = false;
@@ -360,14 +328,13 @@
     }
 
     if (moved) {
-      e.preventDefault(); // Prevent page scrolling
+      e.preventDefault();
       updateOverlayStyle();
       updateControlsUI();
       saveState();
     }
   });
 
-  // --- E. START THE EXTENSION ---
   loadStateAndInitialize();
 
 })();

@@ -4,8 +4,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 2147483646; /* High z-index */
-  pointer-events: none; /* Default to allow clicking through */
+  z-index: 2147483646;
+  pointer-events: none;
 }
 
 #overlay-container.draggable {
@@ -28,7 +28,7 @@
   top: 20px;
   right: 20px;
   background: white;
-  z-index: 2147483647; /* Highest z-index */
+  z-index: 2147483647;
   width: 170px;
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
@@ -125,7 +125,6 @@
   margin-top: 4px;
 }
 
-/* Remove borders and rounded corners from controls */
 #overlay-controls button,
 #overlay-controls input[type="number"] {
   border: none;
@@ -133,11 +132,11 @@
 }
 
 #overlay-controls-header button {
-  background-color: transparent; /* Makes them look like icons */
+  background-color: transparent;
 }
 
 #uploadBtn,
 #overlay-controls input[type="number"] {
-  background-color: #f0f0f0; /* So they are visible on white panel */
+  background-color: #f0f0f0;
   padding: 2px 4px;
 }
