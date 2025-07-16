@@ -1,4 +1,5 @@
 (() => {
+  console.log('Overlay script starting...');
   const OVERLAY_ID = 'overlay-container';
   const SHADOW_HOST_ID = 'overlay-shadow-host';
   const CONTROLS_ID = 'overlay-controls';
@@ -172,6 +173,7 @@
       }
       item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span><button class="delete-img-btn" title="Remove image">×</button>`;
       item.addEventListener('click', () => {
+        console.log('Image list item clicked. New activeImageId:', img.id);
         state.activeImageId = img.id;
         overlayImage.src = img.dataUrl;
         updateOverlayStyle();
@@ -181,6 +183,7 @@
 
       item.querySelector('.delete-img-btn').addEventListener('click', (e) => {
         e.stopPropagation();
+        console.log('Deleting image:', img.id);
         
         state.images = state.images.filter(i => i.id !== img.id);
         
@@ -188,9 +191,11 @@
           if (state.images.length > 0) {
             state.activeImageId = state.images[0].id;
             overlayImage.src = state.images[0].dataUrl;
+            console.log('Active image deleted. New active image:', state.activeImageId);
           } else {
             state.activeImageId = null;
             overlayImage.src = '';
+            console.log('Last image deleted.');
           }
         }
         
@@ -203,18 +208,25 @@
   }
 
   function saveState() {
+    console.log('saveState called. isLoaded:', isLoaded);
     if (!isLoaded) return;
+    console.log('Saving state:', JSON.parse(JSON.stringify(state)));
     chrome.storage.local.set({ [storageKey]: state });
   }
 
   function loadStateAndInitialize() {
+    console.log('loadStateAndInitialize called.');
     chrome.storage.local.get(storageKey, (result) => {
+      console.log('Loaded from storage:', result);
       if (result[storageKey]) {
         const loadedState = result[storageKey];
+        console.log('Found state for this origin:', loadedState);
         state.settings = { ...state.settings, ...loadedState.settings };
         state.panel = { ...state.panel, ...loadedState.panel };
         state.images = loadedState.images || [];
         state.activeImageId = loadedState.activeImageId || null;
+      } else {
+        console.log('No state found for this origin.');
       }
       
       const activeImage = state.images.find(img => img.id === state.activeImageId);
@@ -226,6 +238,7 @@
       updateControlsUI();
       renderImageList();
       isLoaded = true;
+      console.log('Initialization complete. isLoaded set to true.');
     });
   }
 
@@ -264,6 +277,7 @@
           name: file.name,
           dataUrl: event.target.result
         };
+        console.log('Adding new image:', newImage);
         state.images.push(newImage);
         state.activeImageId = newImage.id;
         overlayImage.src = newImage.dataUrl;
