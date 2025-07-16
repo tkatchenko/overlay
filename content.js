@@ -66,11 +66,6 @@
     images: [],
     activeImageId: null,
     settings: {
-      x: 0,
-      y: 0,
-      opacity: 0.5,
-      scale: 0.5,
-      invert: 1,
       locked: false,
       hidden: false,
     },
@@ -190,12 +185,18 @@
   };
 
   function updateOverlayStyle() {
-    overlayImage.style.left = `${state.settings.x}px`;
-    overlayImage.style.top = `${state.settings.y}px`;
-    overlayImage.style.opacity = state.settings.opacity;
-    overlayImage.style.transform = `scale(${state.settings.scale})`;
-    overlayImage.style.filter = `invert(${state.settings.invert})`;
-    overlayImage.style.display = state.settings.hidden ? 'none' : 'block';
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+
+    if (activeImage) {
+      overlayImage.style.left = `${activeImage.settings.x}px`;
+      overlayImage.style.top = `${activeImage.settings.y}px`;
+      overlayImage.style.opacity = activeImage.settings.opacity;
+      overlayImage.style.transform = `scale(${activeImage.settings.scale})`;
+      overlayImage.style.filter = `invert(${activeImage.settings.invert})`;
+      overlayImage.style.display = state.settings.hidden ? 'none' : 'block';
+    } else {
+      overlayImage.style.display = 'none';
+    }
     
     overlayContainer.style.pointerEvents = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'none' : 'auto';
     overlayContainer.style.cursor = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'default' : 'move';
@@ -204,14 +205,34 @@
   }
 
   function updateControlsUI() {
-    DOMElements.xPos.value = Math.round(state.settings.x);
-    DOMElements.yPos.value = Math.round(state.settings.y);
-    DOMElements.scaleRange.value = state.settings.scale;
-    DOMElements.scaleNumber.value = state.settings.scale;
-    DOMElements.opacityRange.value = state.settings.opacity;
-    DOMElements.opacityNumber.value = state.settings.opacity;
-    DOMElements.invertRange.value = state.settings.invert;
-    DOMElements.invertNumber.value = state.settings.invert;
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    const imageControls = [
+      DOMElements.xPos, DOMElements.yPos, DOMElements.scaleRange, DOMElements.scaleNumber,
+      DOMElements.opacityRange, DOMElements.opacityNumber, DOMElements.invertRange, DOMElements.invertNumber
+    ];
+
+    if (activeImage) {
+      DOMElements.xPos.value = Math.round(activeImage.settings.x);
+      DOMElements.yPos.value = Math.round(activeImage.settings.y);
+      DOMElements.scaleRange.value = activeImage.settings.scale;
+      DOMElements.scaleNumber.value = activeImage.settings.scale;
+      DOMElements.opacityRange.value = activeImage.settings.opacity;
+      DOMElements.opacityNumber.value = activeImage.settings.opacity;
+      DOMElements.invertRange.value = activeImage.settings.invert;
+      DOMElements.invertNumber.value = activeImage.settings.invert;
+      imageControls.forEach(c => c.disabled = false);
+    } else {
+      DOMElements.xPos.value = '';
+      DOMElements.yPos.value = '';
+      DOMElements.scaleRange.value = 0;
+      DOMElements.scaleNumber.value = '';
+      DOMElements.opacityRange.value = 0;
+      DOMElements.opacityNumber.value = '';
+      DOMElements.invertRange.value = 0;
+      DOMElements.invertNumber.value = '';
+      imageControls.forEach(c => c.disabled = true);
+    }
+
     controls.style.top = `${state.panel.top}px`;
     controls.style.right = `${state.panel.right}px`;
     controls.classList.toggle('minimized', state.panel.minimized);
@@ -288,6 +309,7 @@
         }).catch(console.error);
 
         updateOverlayStyle();
+        updateControlsUI();
         saveState();
       });
 
@@ -321,6 +343,8 @@
               overlayImage.src = '';
               console.log('Last image deleted.');
             }
+            updateOverlayStyle();
+            updateControlsUI();
           }
           renderImageList();
           saveState();
@@ -345,6 +369,26 @@
       if (result[storageKey]) {
         const loadedState = result[storageKey];
         console.log('Found state for this origin:', loadedState);
+        
+        if (loadedState.settings && loadedState.settings.hasOwnProperty('x')) {
+          console.log('Migrating old state format');
+          const imageSettings = {
+            x: loadedState.settings.x,
+            y: loadedState.settings.y,
+            opacity: loadedState.settings.opacity,
+            scale: loadedState.settings.scale,
+            invert: loadedState.settings.invert
+          };
+          (loadedState.images || []).forEach(img => {
+            img.settings = { ...imageSettings };
+          });
+          delete loadedState.settings.x;
+          delete loadedState.settings.y;
+          delete loadedState.settings.opacity;
+          delete loadedState.settings.scale;
+          delete loadedState.settings.invert;
+        }
+
         state.settings = { ...state.settings, ...loadedState.settings };
         state.panel = { ...state.panel, ...loadedState.panel };
         state.images = loadedState.images || [];
@@ -376,17 +420,34 @@
     });
   }
 
-  DOMElements.xPos.addEventListener('input', (e) => { state.settings.x = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
-  DOMElements.yPos.addEventListener('input', (e) => { state.settings.y = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
+  DOMElements.xPos.addEventListener('input', (e) => {
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    if (activeImage) {
+      activeImage.settings.x = parseFloat(e.target.value);
+      updateOverlayStyle();
+      saveState();
+    }
+  });
+  DOMElements.yPos.addEventListener('input', (e) => {
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    if (activeImage) {
+      activeImage.settings.y = parseFloat(e.target.value);
+      updateOverlayStyle();
+      saveState();
+    }
+  });
   
   const setupSyncedInputs = (setting, rangeEl, numberEl) => {
     const handler = (e) => {
-      const value = parseFloat(e.target.value) || 0;
-      state.settings[setting] = value;
-      rangeEl.value = value;
-      numberEl.value = value;
-      updateOverlayStyle();
-      saveState();
+      const activeImage = state.images.find(img => img.id === state.activeImageId);
+      if (activeImage) {
+        const value = parseFloat(e.target.value) || 0;
+        activeImage.settings[setting] = value;
+        rangeEl.value = value;
+        numberEl.value = value;
+        updateOverlayStyle();
+        saveState();
+      }
     };
     rangeEl.addEventListener('input', handler);
     numberEl.addEventListener('input', handler);
@@ -415,7 +476,11 @@
 
         console.log('Adding new image:', {id: newImageRecord.id, name: newImageRecord.name});
         saveImageToDB(newImageRecord).then(() => {
-          const newImageState = { id: newImageRecord.id, name: newImageRecord.name };
+          const newImageState = {
+            id: newImageRecord.id,
+            name: newImageRecord.name,
+            settings: { x: 0, y: 0, scale: 0.5, opacity: 0.5, invert: 0 }
+          };
           state.images.push(newImageState);
           state.activeImageId = newImageRecord.id;
 
@@ -425,6 +490,8 @@
           const blob = new Blob([newImageRecord.data], { type: newImageRecord.mimeType });
           overlayImage.src = URL.createObjectURL(blob);
 
+          updateOverlayStyle();
+          updateControlsUI();
           renderImageList();
           saveState();
         }).catch(console.error);
@@ -436,14 +503,16 @@
 
   overlayContainer.addEventListener('mousedown', (e) => {
     if (state.settings.locked) return;
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    if (!activeImage) return;
     
     e.preventDefault();
-    const startX = e.pageX - state.settings.x;
-    const startY = e.pageY - state.settings.y;
+    const startX = e.pageX - activeImage.settings.x;
+    const startY = e.pageY - activeImage.settings.y;
 
     function onMouseMove(moveEvent) {
-      state.settings.x = moveEvent.pageX - startX;
-      state.settings.y = moveEvent.pageY - startY;
+      activeImage.settings.x = moveEvent.pageX - startX;
+      activeImage.settings.y = moveEvent.pageY - startY;
       updateOverlayStyle();
       updateControlsUI();
     }
@@ -496,22 +565,25 @@
 
     if (!state.activeImageId || state.settings.locked) return;
 
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    if (!activeImage) return;
+
     let moved = false;
     switch (e.key) {
       case 'ArrowUp':
-        state.settings.y--;
+        activeImage.settings.y--;
         moved = true;
         break;
       case 'ArrowDown':
-        state.settings.y++;
+        activeImage.settings.y++;
         moved = true;
         break;
       case 'ArrowLeft':
-        state.settings.x--;
+        activeImage.settings.x--;
         moved = true;
         break;
       case 'ArrowRight':
-        state.settings.x++;
+        activeImage.settings.x++;
         moved = true;
         break;
     }
