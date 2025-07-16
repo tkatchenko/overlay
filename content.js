@@ -1,5 +1,60 @@
 (() => {
   console.log('Overlay script starting...');
+
+  const DB_NAME = 'OverlayImageDatabase';
+  const DB_VERSION = 1;
+  const STORE_NAME = 'images';
+  let db;
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+      request.onerror = (event) => reject('Error opening DB');
+      request.onsuccess = (event) => {
+        db = event.target.result;
+        resolve(db);
+      };
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+      };
+    });
+  }
+
+  function saveImageToDB(image) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put(image);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function getImageFromDB(id) {
+    return new Promise((resolve, reject) => {
+      if (!db) {
+        reject('DB not open');
+        return;
+      }
+      const transaction = db.transaction([STORE_NAME], 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get(id);
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function deleteImageFromDB(id) {
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.delete(id);
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
   const OVERLAY_ID = 'overlay-container';
   const SHADOW_HOST_ID = 'overlay-shadow-host';
   const CONTROLS_ID = 'overlay-controls';
@@ -164,6 +219,8 @@
 
   function renderImageList() {
     DOMElements.imageList.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
     state.images.forEach(img => {
       const item = document.createElement('div');
       item.className = 'image-list-item';
@@ -171,40 +228,81 @@
       if (img.id === state.activeImageId) {
         item.classList.add('active');
       }
-      item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span><button class="delete-img-btn" title="Remove image">×</button>`;
+      
+      const thumb = document.createElement('img');
+      thumb.alt = 'thumb';
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = img.name;
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-img-btn';
+      deleteBtn.title = 'Remove image';
+      deleteBtn.innerHTML = '&times;';
+      
+      item.appendChild(thumb);
+      item.appendChild(nameSpan);
+      item.appendChild(deleteBtn);
+
+      getImageFromDB(img.id).then(imageRecord => {
+        if (imageRecord) {
+          const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
+          thumb.src = URL.createObjectURL(blob);
+          thumb.onload = () => URL.revokeObjectURL(thumb.src);
+        }
+      }).catch(console.error);
+
       item.addEventListener('click', () => {
-        console.log('Image list item clicked. New activeImageId:', img.id);
         state.activeImageId = img.id;
-        overlayImage.src = img.dataUrl;
+        console.log('Image list item clicked. New activeImageId:', img.id);
+
+        getImageFromDB(img.id).then(imageRecord => {
+          if(imageRecord) {
+            if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
+              URL.revokeObjectURL(overlayImage.src);
+            }
+            const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
+            overlayImage.src = URL.createObjectURL(blob);
+          }
+        }).catch(console.error);
+
         updateOverlayStyle();
         renderImageList();
         saveState();
       });
 
-      item.querySelector('.delete-img-btn').addEventListener('click', (e) => {
+      deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         console.log('Deleting image:', img.id);
-        
-        state.images = state.images.filter(i => i.id !== img.id);
-        
-        if (state.activeImageId === img.id) {
-          if (state.images.length > 0) {
-            state.activeImageId = state.images[0].id;
-            overlayImage.src = state.images[0].dataUrl;
-            console.log('Active image deleted. New active image:', state.activeImageId);
-          } else {
-            state.activeImageId = null;
-            overlayImage.src = '';
-            console.log('Last image deleted.');
-          }
-        }
-        
-        renderImageList();
-        saveState();
-      });
 
-      DOMElements.imageList.appendChild(item);
+        deleteImageFromDB(img.id).then(() => {
+          const wasActive = state.activeImageId === img.id;
+          state.images = state.images.filter(i => i.id !== img.id);
+          
+          if (wasActive) {
+            if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
+              URL.revokeObjectURL(overlayImage.src);
+            }
+            if (state.images.length > 0) {
+              state.activeImageId = state.images[0].id;
+              console.log('Active image deleted. New active image:', state.activeImageId);
+              getImageFromDB(state.activeImageId).then(imageRecord => {
+                if (imageRecord) {
+                  const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
+                  overlayImage.src = URL.createObjectURL(blob);
+                }
+              }).catch(console.error);
+            } else {
+              state.activeImageId = null;
+              overlayImage.src = '';
+              console.log('Last image deleted.');
+            }
+          }
+          renderImageList();
+          saveState();
+        }).catch(console.error);
+      });
+      fragment.appendChild(item);
     });
+    DOMElements.imageList.appendChild(fragment);
   }
 
   function saveState() {
@@ -229,9 +327,19 @@
         console.log('No state found for this origin.');
       }
       
-      const activeImage = state.images.find(img => img.id === state.activeImageId);
-      if (activeImage) {
-        overlayImage.src = activeImage.dataUrl;
+      if (state.activeImageId) {
+        const activeImage = state.images.find(img => img.id === state.activeImageId);
+        if (activeImage) {
+          getImageFromDB(state.activeImageId).then(imageRecord => {
+            if (imageRecord) {
+              if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
+                URL.revokeObjectURL(overlayImage.src);
+              }
+              const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
+              overlayImage.src = URL.createObjectURL(blob);
+            }
+          }).catch(console.error);
+        }
       }
 
       updateOverlayStyle();
@@ -272,19 +380,30 @@
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onload = (event) => {
-        const newImage = {
+        const newImageRecord = {
           id: Date.now().toString(),
           name: file.name,
-          dataUrl: event.target.result
+          mimeType: file.type,
+          data: event.target.result // ArrayBuffer
         };
-        console.log('Adding new image:', newImage);
-        state.images.push(newImage);
-        state.activeImageId = newImage.id;
-        overlayImage.src = newImage.dataUrl;
-        renderImageList();
-        saveState();
+
+        console.log('Adding new image:', {id: newImageRecord.id, name: newImageRecord.name});
+        saveImageToDB(newImageRecord).then(() => {
+          const newImageState = { id: newImageRecord.id, name: newImageRecord.name };
+          state.images.push(newImageState);
+          state.activeImageId = newImageRecord.id;
+
+          if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
+            URL.revokeObjectURL(overlayImage.src);
+          }
+          const blob = new Blob([newImageRecord.data], { type: newImageRecord.mimeType });
+          overlayImage.src = URL.createObjectURL(blob);
+
+          renderImageList();
+          saveState();
+        }).catch(console.error);
       };
-      reader.readAsDataURL(file);
+      reader.readAsArrayBuffer(file);
       e.target.value = '';
     }
   });
@@ -379,6 +498,8 @@
     }
   });
 
-  loadStateAndInitialize();
+  openDB().then(() => {
+    loadStateAndInitialize();
+  }).catch(console.error);
 
 })();
