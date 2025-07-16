@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Space Mono';
+  src: url(https://fonts.gstatic.com/s/spacemono/v17/i7dPIFZifjKcF5UAWdDRYE98RXi4EwSsbg.woff2) format('woff2');
+}
+
 #overlay-controls {
   position: fixed;
   top: 20px;
@@ -7,7 +12,7 @@
   width: 170px;
   pointer-events: auto;
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
-  font-family: 'Space Mono', sans-serif;
+  font-family: 'Space Mono', serif;
   font-size: 12px;
 }
 
