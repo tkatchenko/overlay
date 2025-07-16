@@ -121,6 +121,7 @@
     
     overlayContainer.classList.toggle('draggable', !state.settings.locked);
     DOMElements.lockBtn.textContent = state.settings.locked ? '🔒' : '🔓';
+    DOMElements.hideBtn.style.opacity = state.settings.hidden ? '0.5' : '1';
   }
 
   function updateControlsUI() {
