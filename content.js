@@ -5,6 +5,7 @@
   const DB_VERSION = 1;
   const STORE_NAME = 'images';
   let db;
+  let thumbnailCache = {};
 
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -243,16 +244,20 @@
       item.appendChild(nameSpan);
       item.appendChild(deleteBtn);
 
-      getImageFromDB(img.id).then(imageRecord => {
-        if (imageRecord) {
-          const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
-          thumb.src = URL.createObjectURL(blob);
-          thumb.onload = () => {
+      if (thumbnailCache[img.id]) {
+        thumb.src = thumbnailCache[img.id];
+        thumb.style.visibility = 'visible';
+      } else {
+        getImageFromDB(img.id).then(imageRecord => {
+          if (imageRecord) {
+            const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
+            const url = URL.createObjectURL(blob);
+            thumbnailCache[img.id] = url;
+            thumb.src = url;
             thumb.style.visibility = 'visible';
-            URL.revokeObjectURL(thumb.src);
-          };
-        }
-      }).catch(console.error);
+          }
+        }).catch(console.error);
+      }
 
       item.addEventListener('click', () => {
         state.activeImageId = img.id;
@@ -278,6 +283,10 @@
         console.log('Deleting image:', img.id);
 
         deleteImageFromDB(img.id).then(() => {
+          if (thumbnailCache[img.id]) {
+            URL.revokeObjectURL(thumbnailCache[img.id]);
+            delete thumbnailCache[img.id];
+          }
           const wasActive = state.activeImageId === img.id;
           state.images = state.images.filter(i => i.id !== img.id);
           
