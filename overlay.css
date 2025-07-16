@@ -27,26 +27,19 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: white;
+  border: 1px solid #999;
   z-index: 2147483647; /* Highest z-index */
-  width: 280px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  font-size: 14px;
-  color: #212529;
+  width: 170px;
   pointer-events: auto;
 }
 
 #pixel-perfect-controls-header {
-  padding: 8px 12px;
-  background: #e9ecef;
-  border-bottom: 1px solid #dee2e6;
-  border-radius: 8px 8px 0 0;
+  padding: 4px;
+  border-bottom: 1px solid #999;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   cursor: grab;
 }
 #pixel-perfect-controls-header:active {
@@ -55,7 +48,7 @@
 
 
 #pixel-perfect-controls-body {
-  padding: 12px;
+  padding: 4px;
 }
 #pixel-perfect-controls.minimized #pixel-perfect-controls-body {
   display: none;
@@ -63,13 +56,13 @@
 
 
 .control-group {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .control-group label {
-  font-weight: 500;
+  font-weight: normal;
 }
 .control-group input[type="number"], .control-group input[type="range"] {
   width: 100%;
@@ -85,33 +78,30 @@
 }
 
 #image-list-container {
-  margin-top: 16px;
+  margin-top: 8px;
   max-height: 150px;
   overflow-y: auto;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  padding: 4px;
+  border: 1px solid #999;
+  padding: 2px;
 }
 .image-list-item {
   display: flex;
   align-items: center;
-  padding: 4px;
+  padding: 2px;
   cursor: pointer;
-  border-radius: 4px;
 }
 .image-list-item:hover {
-  background: #e9ecef;
+  background: #eee;
 }
 .image-list-item.active {
-  background: #0d6efd;
-  color: white;
+  background: #ccc;
 }
 .image-list-item img {
   width: 32px;
   height: 32px;
   object-fit: cover;
-  margin-right: 8px;
-  border: 1px solid #dee2e6;
+  margin-right: 4px;
+  border: 1px solid #999;
 }
 .image-list-item span {
   white-space: nowrap;

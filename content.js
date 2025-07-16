@@ -70,15 +70,24 @@
       </div>
       <div class="control-group">
         <label>Scale</label>
-        <input type="range" id="scaleRange" min="0.1" max="3" step="0.05">
+        <div class="input-row">
+          <div><input type="range" id="scaleRange" min="0.1" max="3" step="0.05"></div>
+          <div><input type="number" id="scaleNumber" min="0.1" max="3" step="0.05"></div>
+        </div>
       </div>
       <div class="control-group">
         <label>Opacity</label>
-        <input type="range" id="opacityRange" min="0" max="1" step="0.05">
+        <div class="input-row">
+          <div><input type="range" id="opacityRange" min="0" max="1" step="0.05"></div>
+          <div><input type="number" id="opacityNumber" min="0" max="1" step="0.05"></div>
+        </div>
       </div>
       <div class="control-group">
         <label>Invert</label>
-        <input type="range" id="invertRange" min="0" max="1" step="0.1">
+        <div class="input-row">
+          <div><input type="range" id="invertRange" min="0" max="1" step="0.1"></div>
+          <div><input type="number" id="invertNumber" min="0" max="1" step="0.1"></div>
+        </div>
       </div>
       <div class="control-group">
         <label>Layers</label>
@@ -96,8 +105,11 @@
     xPos: document.getElementById('xPos'),
     yPos: document.getElementById('yPos'),
     scaleRange: document.getElementById('scaleRange'),
+    scaleNumber: document.getElementById('scaleNumber'),
     opacityRange: document.getElementById('opacityRange'),
+    opacityNumber: document.getElementById('opacityNumber'),
     invertRange: document.getElementById('invertRange'),
+    invertNumber: document.getElementById('invertNumber'),
     imageUpload: document.getElementById('imageUpload'),
     imageList: document.getElementById('image-list-container'),
     controlsHeader: document.getElementById('pixel-perfect-controls-header'),
@@ -124,8 +136,11 @@
     DOMElements.xPos.value = Math.round(state.settings.x);
     DOMElements.yPos.value = Math.round(state.settings.y);
     DOMElements.scaleRange.value = state.settings.scale;
+    DOMElements.scaleNumber.value = state.settings.scale;
     DOMElements.opacityRange.value = state.settings.opacity;
+    DOMElements.opacityNumber.value = state.settings.opacity;
     DOMElements.invertRange.value = state.settings.invert;
+    DOMElements.invertNumber.value = state.settings.invert;
     controls.style.top = `${state.panel.top}px`;
     controls.style.right = `${state.panel.right}px`;
     controls.classList.toggle('minimized', state.panel.minimized);
@@ -186,9 +201,23 @@
   // Control panel inputs
   DOMElements.xPos.addEventListener('input', (e) => { state.settings.x = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
   DOMElements.yPos.addEventListener('input', (e) => { state.settings.y = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
-  DOMElements.scaleRange.addEventListener('input', (e) => { state.settings.scale = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
-  DOMElements.opacityRange.addEventListener('input', (e) => { state.settings.opacity = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
-  DOMElements.invertRange.addEventListener('input', (e) => { state.settings.invert = parseFloat(e.target.value); updateOverlayStyle(); saveState(); });
+  
+  const setupSyncedInputs = (setting, rangeEl, numberEl) => {
+    const handler = (e) => {
+      const value = parseFloat(e.target.value) || 0;
+      state.settings[setting] = value;
+      rangeEl.value = value;
+      numberEl.value = value;
+      updateOverlayStyle();
+      saveState();
+    };
+    rangeEl.addEventListener('input', handler);
+    numberEl.addEventListener('input', handler);
+  };
+
+  setupSyncedInputs('scale', DOMElements.scaleRange, DOMElements.scaleNumber);
+  setupSyncedInputs('opacity', DOMElements.opacityRange, DOMElements.opacityNumber);
+  setupSyncedInputs('invert', DOMElements.invertRange, DOMElements.invertNumber);
   
   // Header buttons
   DOMElements.lockBtn.addEventListener('click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
