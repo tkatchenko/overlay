@@ -28,19 +28,19 @@
   top: 20px;
   right: 20px;
   background: white;
-  border: 1px solid #999;
   z-index: 2147483647; /* Highest z-index */
   width: 170px;
   pointer-events: auto;
+  box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 #pixel-perfect-controls-header {
   padding: 4px;
-  border-bottom: 1px solid #999;
   display: flex;
   align-items: center;
   gap: 4px;
   cursor: grab;
+  justify-content: flex-end;
 }
 #pixel-perfect-controls-header:active {
   cursor: grabbing;
@@ -81,7 +81,6 @@
   margin-top: 8px;
   max-height: 150px;
   overflow-y: auto;
-  border: 1px solid #999;
   padding: 2px;
 }
 .image-list-item {
@@ -101,10 +100,27 @@
   height: 32px;
   object-fit: cover;
   margin-right: 4px;
-  border: 1px solid #999;
 }
 .image-list-item span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.delete-img-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0 4px;
+  margin-left: auto;
+}
+.delete-img-btn:hover {
+  color: red;
+}
+
+#uploadBtn {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
 }

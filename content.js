@@ -91,8 +91,9 @@
       </div>
       <div class="control-group">
         <label>Layers</label>
-        <input type="file" id="imageUpload" accept="image/*">
         <div id="image-list-container"></div>
+        <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+        <button id="uploadBtn">Add Image</button>
       </div>
     </div>
   `;
@@ -111,6 +112,7 @@
     invertRange: document.getElementById('invertRange'),
     invertNumber: document.getElementById('invertNumber'),
     imageUpload: document.getElementById('imageUpload'),
+    uploadBtn: document.getElementById('uploadBtn'),
     imageList: document.getElementById('image-list-container'),
     controlsHeader: document.getElementById('pixel-perfect-controls-header'),
     controlsBody: document.getElementById('pixel-perfect-controls-body')
@@ -156,13 +158,35 @@
       if (img.id === state.activeImageId) {
         item.classList.add('active');
       }
-      item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span>`;
+      item.innerHTML = `<img src="${img.dataUrl}" alt="thumb"> <span>${img.name}</span><button class="delete-img-btn" title="Remove image">✖</button>`;
       item.addEventListener('click', () => {
         state.activeImageId = img.id;
         overlayImage.src = img.dataUrl;
         renderImageList(); // Re-render to show active state
         saveState();
       });
+
+      item.querySelector('.delete-img-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        
+        // Remove image from state
+        state.images = state.images.filter(i => i.id !== img.id);
+        
+        // If the active image was deleted, handle it
+        if (state.activeImageId === img.id) {
+          if (state.images.length > 0) {
+            state.activeImageId = state.images[0].id;
+            overlayImage.src = state.images[0].dataUrl;
+          } else {
+            state.activeImageId = null;
+            overlayImage.src = '';
+          }
+        }
+        
+        renderImageList();
+        saveState();
+      });
+
       DOMElements.imageList.appendChild(item);
     });
   }
@@ -225,6 +249,7 @@
   DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; controls.classList.toggle('minimized'); saveState(); });
 
   // Image upload
+  DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
   DOMElements.imageUpload.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
