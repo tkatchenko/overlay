@@ -30,9 +30,22 @@
 
   const overlayContainer = document.createElement('div');
   overlayContainer.id = OVERLAY_ID;
+  Object.assign(overlayContainer.style, {
+    position: 'fixed',
+    top: '0',
+    left: '0',
+    width: '100%',
+    height: '100%',
+    zIndex: '2147483646',
+    pointerEvents: 'none'
+  });
 
   const overlayImage = document.createElement('img');
   overlayImage.id = 'overlay-image';
+  Object.assign(overlayImage.style, {
+    position: 'absolute',
+    transformOrigin: 'top left',
+  });
   overlayContainer.appendChild(overlayImage);
 
   const shadowHost = document.createElement('div');
@@ -125,7 +138,8 @@
     overlayImage.style.filter = `invert(${state.settings.invert})`;
     overlayImage.style.display = state.settings.hidden ? 'none' : 'block';
     
-    overlayContainer.classList.toggle('draggable', !state.settings.locked);
+    overlayContainer.style.pointerEvents = state.settings.locked ? 'none' : 'auto';
+    overlayContainer.style.cursor = state.settings.locked ? 'default' : 'move';
     DOMElements.lockBtn.textContent = state.settings.locked ? '🔒' : '🔓';
     DOMElements.hideBtn.style.opacity = state.settings.hidden ? '0.5' : '1';
   }
