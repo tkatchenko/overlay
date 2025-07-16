@@ -139,8 +139,8 @@
     overlayImage.style.filter = `invert(${state.settings.invert})`;
     overlayImage.style.display = state.settings.hidden ? 'none' : 'block';
     
-    overlayContainer.style.pointerEvents = (state.settings.hidden || state.settings.locked) ? 'none' : 'auto';
-    overlayContainer.style.cursor = (state.settings.hidden || state.settings.locked) ? 'default' : 'move';
+    overlayContainer.style.pointerEvents = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'none' : 'auto';
+    overlayContainer.style.cursor = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'default' : 'move';
     DOMElements.lockBtn.textContent = state.settings.locked ? '🔒' : '🔓';
     DOMElements.hideBtn.style.opacity = state.settings.hidden ? '0.5' : '1';
   }
@@ -173,6 +173,7 @@
       item.addEventListener('click', () => {
         state.activeImageId = img.id;
         overlayImage.src = img.dataUrl;
+        updateOverlayStyle();
         renderImageList();
         saveState();
       });
