@@ -331,6 +331,42 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
+  // Keyboard navigation for the overlay image
+  document.addEventListener('keydown', (e) => {
+    // Ignore if typing in an input
+    if (e.target.tagName === 'INPUT') return;
+
+    // Ignore if no image is active or if it's locked
+    if (!state.activeImageId || state.settings.locked) return;
+
+    let moved = false;
+    switch (e.key) {
+      case 'ArrowUp':
+        state.settings.y--;
+        moved = true;
+        break;
+      case 'ArrowDown':
+        state.settings.y++;
+        moved = true;
+        break;
+      case 'ArrowLeft':
+        state.settings.x--;
+        moved = true;
+        break;
+      case 'ArrowRight':
+        state.settings.x++;
+        moved = true;
+        break;
+    }
+
+    if (moved) {
+      e.preventDefault(); // Prevent page scrolling
+      updateOverlayStyle();
+      updateControlsUI();
+      saveState();
+    }
+  });
+
   // --- E. START THE EXTENSION ---
   loadStateAndInitialize();
 
