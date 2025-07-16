@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  src: url('chrome-extension://__MSG_@@extension_id__/fonts/SpaceMono-Regular.woff2') format('woff2');
+}
 
 #overlay-container {
   position: fixed;

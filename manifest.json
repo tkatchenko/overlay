@@ -18,7 +18,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["overlay.css"],
+      "resources": ["overlay.css", "fonts/SpaceMono-Regular.woff2"],
       "matches": ["<all_urls>"]
     }
   ]
