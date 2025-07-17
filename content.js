@@ -479,7 +479,7 @@
           const newImageState = {
             id: newImageRecord.id,
             name: newImageRecord.name,
-            settings: { x: 0, y: 0, scale: 0.5, opacity: 0.5, invert: 0 }
+            settings: { x: 0, y: window.scrollY, scale: 0.5, opacity: 0.5, invert: 0 }
           };
           state.images.push(newImageState);
           state.activeImageId = newImageRecord.id;
@@ -527,6 +527,37 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
+  overlayContainer.addEventListener('touchstart', (e) => {
+    if (state.settings.locked) return;
+    const activeImage = state.images.find(img => img.id === state.activeImageId);
+    if (!activeImage) return;
+
+    if (e.touches.length !== 1) return;
+    
+    e.preventDefault();
+    const touch = e.touches[0];
+    const startX = touch.pageX - activeImage.settings.x;
+    const startY = touch.pageY - activeImage.settings.y;
+
+    function onTouchMove(moveEvent) {
+      if (moveEvent.touches.length !== 1) return;
+      const touch = moveEvent.touches[0];
+      activeImage.settings.x = touch.pageX - startX;
+      activeImage.settings.y = touch.pageY - startY;
+      updateOverlayStyle();
+      updateControlsUI();
+    }
+
+    function onTouchEnd() {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      saveState();
+    }
+
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+  }, { passive: false });
+
   DOMElements.controlsHeader.addEventListener('mousedown', (e) => {
     e.preventDefault();
     const rect = controls.getBoundingClientRect();
@@ -559,6 +590,44 @@
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
+
+  DOMElements.controlsHeader.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    e.preventDefault();
+
+    const touch = e.touches[0];
+    const rect = controls.getBoundingClientRect();
+    const startX = touch.clientX;
+    const startY = touch.clientY;
+    const startRight = window.innerWidth - rect.right;
+    const startTop = rect.top;
+
+    function onTouchMove(moveEvent) {
+      if (moveEvent.touches.length !== 1) return;
+      const touch = moveEvent.touches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      state.panel.top = startTop + dy;
+      state.panel.right = startRight - dx;
+
+      if (state.panel.top < 0) state.panel.top = 0;
+      if (state.panel.right < 0) state.panel.right = 0;
+      if (state.panel.top > window.innerHeight - controls.offsetHeight) state.panel.top = window.innerHeight - controls.offsetHeight;
+      if (state.panel.right > window.innerWidth - controls.offsetWidth) state.panel.right = window.innerWidth - controls.offsetWidth;
+
+      controls.style.top = `${state.panel.top}px`;
+      controls.style.right = `${state.panel.right}px`;
+    }
+
+    function onTouchEnd() {
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+      saveState();
+    }
+    
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('touchend', onTouchEnd);
+  }, { passive: false });
 
   document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT') return;
