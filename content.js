@@ -1,6 +1,4 @@
 (() => {
-  console.log('Overlay script starting...');
-
   const DB_NAME = 'OverlayImageDatabase';
   const DB_VERSION = 1;
   const STORE_NAME = 'images';
@@ -292,7 +290,6 @@
 
         const previousActiveId = state.activeImageId;
         state.activeImageId = img.id;
-        console.log('Image list item clicked. New activeImageId:', img.id);
 
         if (previousActiveId) {
           const previousActiveItem = DOMElements.imageList.querySelector(`[data-id='${previousActiveId}']`);
@@ -317,7 +314,6 @@
 
       deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        console.log('Deleting image:', img.id);
 
         deleteImageFromDB(img.id).then(() => {
           if (thumbnailCache[img.id]) {
@@ -333,7 +329,6 @@
             }
             if (state.images.length > 0) {
               state.activeImageId = state.images[0].id;
-              console.log('Active image deleted. New active image:', state.activeImageId);
               getImageFromDB(state.activeImageId).then(imageRecord => {
                 if (imageRecord) {
                   const blob = new Blob([imageRecord.data], { type: imageRecord.mimeType });
@@ -343,7 +338,6 @@
             } else {
               state.activeImageId = null;
               overlayImage.src = '';
-              console.log('Last image deleted.');
             }
             updateOverlayStyle();
             updateControlsUI();
@@ -358,22 +352,16 @@
   }
 
   function saveState() {
-    console.log('saveState called. isLoaded:', isLoaded);
     if (!isLoaded) return;
-    console.log('Saving state:', JSON.parse(JSON.stringify(state)));
     chrome.storage.local.set({ [storageKey]: state });
   }
 
   function loadStateAndInitialize() {
-    console.log('loadStateAndInitialize called.');
     chrome.storage.local.get(storageKey, (result) => {
-      console.log('Loaded from storage:', result);
       if (result[storageKey]) {
         const loadedState = result[storageKey];
-        console.log('Found state for this origin:', loadedState);
         
         if (loadedState.settings && loadedState.settings.hasOwnProperty('x')) {
-          console.log('Migrating old state format');
           const imageSettings = {
             x: loadedState.settings.x,
             y: loadedState.settings.y,
@@ -395,8 +383,6 @@
         state.panel = { ...state.panel, ...loadedState.panel };
         state.images = loadedState.images || [];
         state.activeImageId = loadedState.activeImageId || null;
-      } else {
-        console.log('No state found for this origin.');
       }
       
       if (state.activeImageId) {
@@ -418,7 +404,6 @@
       updateControlsUI();
       renderImageList();
       isLoaded = true;
-      console.log('Initialization complete. isLoaded set to true.');
     });
   }
 
@@ -473,10 +458,9 @@
           id: Date.now().toString(),
           name: file.name,
           mimeType: file.type,
-          data: event.target.result // ArrayBuffer
+          data: event.target.result
         };
 
-        console.log('Adding new image:', {id: newImageRecord.id, name: newImageRecord.name});
         saveImageToDB(newImageRecord).then(() => {
           const newImageState = {
             id: newImageRecord.id,
