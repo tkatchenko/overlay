@@ -561,6 +561,7 @@
   }, { passive: false });
 
   DOMElements.controlsHeader.addEventListener('mousedown', (e) => {
+    if (e.target.tagName === 'BUTTON') return;
     e.preventDefault();
     const rect = controls.getBoundingClientRect();
     const startX = e.clientX;
@@ -594,6 +595,8 @@
   });
 
   DOMElements.controlsHeader.addEventListener('touchstart', (e) => {
+    if (e.target.tagName === 'BUTTON') return;
+
     if (e.touches.length !== 1) return;
     e.preventDefault();
 
