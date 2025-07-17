@@ -91,7 +91,8 @@
     width: '100%',
     height: `${document.documentElement.scrollHeight}px`,
     zIndex: '2147483646',
-    pointerEvents: 'none'
+    pointerEvents: 'none',
+    overflowX: 'hidden'
   });
 
   const overlayImage = document.createElement('img');
