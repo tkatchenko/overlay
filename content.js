@@ -92,7 +92,8 @@
     height: `${document.documentElement.scrollHeight}px`,
     zIndex: '2147483646',
     pointerEvents: 'none',
-    overflowX: 'hidden'
+    overflowX: 'hidden',
+    overflowY: 'hidden'
   });
 
   const overlayImage = document.createElement('img');
