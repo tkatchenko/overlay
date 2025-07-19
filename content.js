@@ -290,6 +290,7 @@
 
         const previousActiveId = state.activeImageId;
         state.activeImageId = img.id;
+        state.settings.hidden = false;
 
         if (previousActiveId) {
           const previousActiveItem = DOMElements.imageList.querySelector(`[data-id='${previousActiveId}']`);
@@ -469,6 +470,7 @@
           };
           state.images.push(newImageState);
           state.activeImageId = newImageRecord.id;
+          state.settings.hidden = false;
 
           if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
             URL.revokeObjectURL(overlayImage.src);
