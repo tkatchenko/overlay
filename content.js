@@ -4,6 +4,7 @@
   const STORE_NAME = 'images';
   let db;
   let thumbnailCache = {};
+  let liveReloadSocket;
 
   function openDB() {
     return new Promise((resolve, reject) => {
@@ -66,6 +67,7 @@
     settings: {
       locked: false,
       hidden: false,
+      liveReload: false,
     },
     panel: {
       minimized: false,
@@ -123,6 +125,7 @@
     <div id="overlay-controls-header">
       <span>Overlay</span>
       <div>
+        <button id="liveReloadBtn" class="live-reload-btn" title="Connect to LiveReload">⚡</button>
         <button id="lockBtn" title="Lock/Unlock Image">🔒</button>
         <button id="hideBtn" title="Hide/Show Image">👁️</button>
         <button id="minBtn" title="Minimize/Restore Panel">➖</button>
@@ -166,6 +169,7 @@
   `;
 
   const DOMElements = {
+    liveReloadBtn: shadowRoot.getElementById('liveReloadBtn'),
     lockBtn: shadowRoot.getElementById('lockBtn'),
     hideBtn: shadowRoot.getElementById('hideBtn'),
     minBtn: shadowRoot.getElementById('minBtn'),
@@ -386,6 +390,10 @@
         state.activeImageId = loadedState.activeImageId || null;
       }
       
+      if (state.settings.liveReload) {
+        connectLiveReload();
+      }
+
       if (state.activeImageId) {
         const activeImage = state.images.find(img => img.id === state.activeImageId);
         if (activeImage) {
@@ -406,6 +414,68 @@
       renderImageList();
       isLoaded = true;
     });
+  }
+
+  function connectLiveReload() {
+    if (liveReloadSocket && liveReloadSocket.readyState < 2) return;
+
+    liveReloadSocket = new WebSocket('ws://localhost:35729/livereload');
+
+    liveReloadSocket.onopen = () => {
+      liveReloadSocket.send(JSON.stringify({
+        command: 'hello',
+        protocols: ['http://livereload.com/protocols/official-7']
+      }));
+      DOMElements.liveReloadBtn.classList.add('connected');
+      DOMElements.liveReloadBtn.title = 'LiveReload Connected';
+    };
+
+    liveReloadSocket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.command === 'reload') {
+        const path = data.path;
+        if (path.endsWith('.css')) {
+          document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
+            if (link.href) {
+              const url = new URL(link.href);
+              url.searchParams.set('v', Date.now());
+              link.href = url.href;
+            }
+          });
+          const shadowLink = shadowRoot.querySelector('link[rel="stylesheet"]');
+          if (shadowLink && shadowLink.href) {
+            const url = new URL(shadowLink.href);
+            url.searchParams.set('v', Date.now());
+            shadowLink.href = url.href;
+          }
+        } else {
+          window.location.reload();
+        }
+      }
+    };
+
+    liveReloadSocket.onclose = () => {
+      liveReloadSocket = null;
+      DOMElements.liveReloadBtn.classList.remove('connected');
+      DOMElements.liveReloadBtn.title = 'Connect to LiveReload';
+      if (state.settings.liveReload) {
+        setTimeout(connectLiveReload, 2000);
+      }
+    };
+
+    liveReloadSocket.onerror = (error) => {
+      console.error('LiveReload connection error:', error);
+    };
+  }
+
+  function disconnectLiveReload() {
+    if (liveReloadSocket) {
+      liveReloadSocket.onclose = null; // Prevent reconnection
+      liveReloadSocket.close();
+      liveReloadSocket = null;
+      DOMElements.liveReloadBtn.classList.remove('connected');
+      DOMElements.liveReloadBtn.title = 'Connect to LiveReload';
+    }
   }
 
   DOMElements.xPos.addEventListener('input', (e) => {
@@ -448,6 +518,16 @@
   DOMElements.lockBtn.addEventListener('click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
   DOMElements.hideBtn.addEventListener('click', () => { state.settings.hidden = !state.settings.hidden; updateOverlayStyle(); saveState(); });
   DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; updateControlsUI(); saveState(); });
+
+  DOMElements.liveReloadBtn.addEventListener('click', () => {
+    state.settings.liveReload = !state.settings.liveReload;
+    if (state.settings.liveReload) {
+      connectLiveReload();
+    } else {
+      disconnectLiveReload();
+    }
+    saveState();
+  });
 
   DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
   DOMElements.imageUpload.addEventListener('change', (e) => {

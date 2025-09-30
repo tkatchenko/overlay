@@ -156,6 +156,10 @@
   cursor: pointer;
 }
 
+#overlay-controls-header .live-reload-btn.connected {
+  color: #00c800;
+}
+
 #overlay-controls input[type="number"] {
   color: black;
   background-color: transparent;
