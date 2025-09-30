@@ -156,6 +156,10 @@
   cursor: pointer;
 }
 
+#overlay-controls-header .live-reload-btn {
+  color: #999;
+}
+
 #overlay-controls-header .live-reload-btn.connected {
   color: #00c800;
 }
