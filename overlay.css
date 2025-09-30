@@ -157,11 +157,11 @@
 }
 
 #overlay-controls-header .live-reload-btn {
-  color: #999;
+  filter: grayscale(100%);
 }
 
 #overlay-controls-header .live-reload-btn.connected {
-  color: #00c800;
+  filter: grayscale(0%);
 }
 
 #overlay-controls input[type="number"] {
