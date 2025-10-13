@@ -81,6 +81,10 @@
   };
 
   if (document.getElementById(SHADOW_HOST_ID)) {
+    chrome.storage.local.get(storageKey, (result) => {
+      const liveReloadActive = result[storageKey] && result[storageKey].settings.liveReload;
+      setIconForLiveReloadState(liveReloadActive || false);
+    });
     document.getElementById(SHADOW_HOST_ID).remove();
     document.getElementById(OVERLAY_ID).remove();
     return;
