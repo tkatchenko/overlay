@@ -1,4 +1,4 @@
-# Image Overlay
+# Overlay
 
 A browser extension to overlay images on web pages.
 
