@@ -6,6 +6,10 @@
   let thumbnailCache = {};
   let liveReloadSocket;
 
+  function setIconForLiveReloadState(status) {
+    chrome.runtime.sendMessage({ type: 'LIVERELOAD_STATUS', status: status });
+  }
+
   function openDB() {
     return new Promise((resolve, reject) => {
       const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -412,6 +416,7 @@
       updateOverlayStyle();
       updateControlsUI();
       renderImageList();
+      setIconForLiveReloadState(state.settings.liveReload);
       isLoaded = true;
     });
   }
@@ -527,6 +532,7 @@
       disconnectLiveReload();
     }
     saveState();
+    setIconForLiveReloadState(state.settings.liveReload);
   });
 
   DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
