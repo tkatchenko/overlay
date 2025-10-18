@@ -558,7 +558,7 @@
           const newImageState = {
             id: newImageRecord.id,
             name: newImageRecord.name,
-            settings: { x: 0, y: window.scrollY, scale: 0.5, opacity: 0.5, invert: 0 }
+            settings: { x: 0, y: window.scrollY, scale: 0.5, opacity: 0.5, invert: 1 }
           };
           state.images.push(newImageState);
           state.activeImageId = newImageRecord.id;
