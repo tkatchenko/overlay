@@ -420,7 +420,6 @@
       updateOverlayStyle();
       updateControlsUI();
       renderImageList();
-      setIconForLiveReloadState(state.settings.liveReload);
       isLoaded = true;
     });
   }
@@ -437,6 +436,7 @@
       }));
       DOMElements.liveReloadBtn.classList.add('connected');
       DOMElements.liveReloadBtn.title = 'LiveReload Connected';
+      setIconForLiveReloadState(true);
     };
 
     liveReloadSocket.onmessage = (event) => {
@@ -467,8 +467,10 @@
       liveReloadSocket = null;
       DOMElements.liveReloadBtn.classList.remove('connected');
       DOMElements.liveReloadBtn.title = 'Connect to LiveReload';
+      setIconForLiveReloadState(false);
       if (state.settings.liveReload) {
-        setTimeout(connectLiveReload, 2000);
+        state.settings.liveReload = false;
+        saveState();
       }
     };
 
@@ -484,6 +486,7 @@
       liveReloadSocket = null;
       DOMElements.liveReloadBtn.classList.remove('connected');
       DOMElements.liveReloadBtn.title = 'Connect to LiveReload';
+      setIconForLiveReloadState(false);
     }
   }
 
@@ -536,7 +539,6 @@
       disconnectLiveReload();
     }
     saveState();
-    setIconForLiveReloadState(state.settings.liveReload);
   });
 
   DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
