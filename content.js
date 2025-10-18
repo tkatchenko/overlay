@@ -210,8 +210,8 @@
       overlayImage.style.display = 'none';
     }
     
-    overlayContainer.style.pointerEvents = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'none' : 'auto';
-    overlayContainer.style.cursor = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'default' : 'move';
+    overlayImage.style.pointerEvents = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'none' : 'auto';
+    overlayImage.style.cursor = (!state.activeImageId || state.settings.hidden || state.settings.locked) ? 'default' : 'move';
     DOMElements.lockBtn.textContent = state.settings.locked ? '🔒' : '🔓';
     DOMElements.hideBtn.style.opacity = state.settings.hidden ? '0.5' : '1';
   }
@@ -581,7 +581,7 @@
     }
   });
 
-  overlayContainer.addEventListener('mousedown', (e) => {
+  overlayImage.addEventListener('mousedown', (e) => {
     if (state.settings.locked) return;
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (!activeImage) return;
@@ -607,7 +607,7 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  overlayContainer.addEventListener('touchstart', (e) => {
+  overlayImage.addEventListener('touchstart', (e) => {
     if (state.settings.locked) return;
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (!activeImage) return;
