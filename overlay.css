@@ -3,6 +3,10 @@
   src: url('chrome-extension://__MSG_@@extension_id__/fonts/SpaceMono-Regular.woff2') format('woff2');
 }
 
+:host {
+  all: initial;
+}
+
 #overlay-controls {
   position: fixed;
   top: 20px;
@@ -17,24 +21,24 @@
   color: black;
 }
 
-#overlay-controls-header {
+#overlay-controls #overlay-controls-header {
   padding: 5px;
   display: flex;
   align-items: center;
   cursor: grab;
   justify-content: space-between;
 }
-#overlay-controls-header > div {
+#overlay-controls #overlay-controls-header > div {
   display: flex;
   gap: 5px;
 }
 
-#overlay-controls-header:active {
+#overlay-controls #overlay-controls-header:active {
   cursor: grabbing;
 }
 
 
-#overlay-controls-body {
+#overlay-controls #overlay-controls-body {
   padding: 10px 5px;
   border-top: 1px dashed black;
 }
@@ -43,63 +47,62 @@
 }
 
 
-.control-group {
+#overlay-controls .control-group {
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-.control-group.layers {
+#overlay-controls .control-group.layers {
   margin-top: 15px;
   margin-bottom: 0;
 }
-.control-group label {
+#overlay-controls .control-group label {
   font-weight: normal;
   margin-top: 10px;
   margin-bottom: -5px;
 }
-.control-group input[type="number"], .control-group input[type="range"] {
+#overlay-controls .control-group input[type="number"],
+#overlay-controls .control-group input[type="range"] {
   width: 100%;
   font-family: 'Space Mono', serif;
   font-size: 12px;
   box-sizing: border-box;
 }
 
-.input-row {
+#overlay-controls .input-row {
   display: flex;
   gap: 8px;
 }
-.input-row > div {
+#overlay-controls .input-row > div {
   position: relative;
   flex: 1;
 }
 
-.input-row.xy label {
+#overlay-controls .input-row.xy label {
   display: block;
   margin: 0;
   margin-bottom: 5px;
 }
 
-#image-list-container {
+#overlay-controls #image-list-container {
   margin-top: 8px;
   max-height: 150px;
   overflow-y: auto;
 }
-.image-list-item {
+#overlay-controls .image-list-item {
   display: flex;
   align-items: center;
   padding: 5px 0;
   cursor: pointer;
 }
-.image-list-item {
-}
-.image-list-item:last-child {
+#overlay-controls .image-list-item:last-child {
   border-bottom: none;
 }
-.image-list-item.active span {
+#overlay-controls .image-list-item.active span {
   text-decoration: underline;
 }
-.image-list-item-thumb {
+#overlay-controls .image-list-item-thumb {
   width: 32px;
   height: 32px;
   margin-right: 5px;
@@ -108,18 +111,18 @@
   justify-content: center;
   flex-shrink: 0;
 }
-.image-list-item img {
+#overlay-controls .image-list-item img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
 }
-.image-list-item span {
+#overlay-controls .image-list-item span {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.delete-img-btn {
+#overlay-controls .delete-img-btn {
   background: transparent;
   border: none;
   cursor: pointer;
@@ -127,11 +130,11 @@
   padding: 0 5px;
   margin-left: auto;
 }
-.delete-img-btn:hover {
+#overlay-controls .delete-img-btn:hover {
   color: red;
 }
 
-#uploadBtn {
+#overlay-controls #uploadBtn {
   width: 100%;
   box-sizing: border-box;
   margin-top: 5px;
@@ -149,18 +152,18 @@
   cursor: pointer;
 }
 
-#overlay-controls-header button {
+#overlay-controls #overlay-controls-header button {
   color: black;
   background-color: transparent;
   padding: 0;
   cursor: pointer;
 }
 
-#overlay-controls-header .live-reload-btn {
+#overlay-controls #overlay-controls-header .live-reload-btn {
   filter: grayscale(100%);
 }
 
-#overlay-controls-header .live-reload-btn.connected {
+#overlay-controls #overlay-controls-header .live-reload-btn.connected {
   filter: grayscale(0%);
 }
 
@@ -173,22 +176,24 @@
   border-bottom: 1px solid black;
 }
 
-input[type=range] {
+#overlay-controls input[type="range"] {
   position: absolute;
   bottom: -2px;
+  appearance: none;
   -webkit-appearance: none;
   background: transparent;
   width: 100%;
   cursor: pointer;
 }
-input[type=range]:focus {
+#overlay-controls input[type="range"]:focus {
   outline: none;
 }
-input[type=range]::-webkit-slider-runnable-track {
+#overlay-controls input[type="range"]::-webkit-slider-runnable-track {
   height: 1px;
   background: black;
 }
-input[type=range]::-webkit-slider-thumb {
+#overlay-controls input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   width: 5px;
   height: 5px;

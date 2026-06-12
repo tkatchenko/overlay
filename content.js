@@ -1,4 +1,12 @@
 (() => {
+  const INSTANCE_KEY = '__overlay_extension_instance__';
+  const existingInstance = window[INSTANCE_KEY];
+  if (existingInstance && typeof existingInstance.destroy === 'function') {
+    existingInstance.destroy();
+    return;
+  }
+  delete window[INSTANCE_KEY];
+
   const DB_NAME = 'OverlayImageDatabase';
   const DB_VERSION = 1;
   const STORE_NAME = 'images';
@@ -7,7 +15,29 @@
   let liveReloadSocket;
 
   function setIconForLiveReloadState(status) {
-    chrome.runtime.sendMessage({ type: 'LIVERELOAD_STATUS', status: status });
+    try {
+      chrome.runtime.sendMessage({ type: 'LIVERELOAD_STATUS', status: status }, () => {
+        void chrome.runtime.lastError;
+      });
+    } catch (error) {
+      // The extension context can disappear while a page is still open.
+    }
+  }
+
+  function parseNumber(value, fallback = 0) {
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function isEditableTarget(target) {
+    if (!(target instanceof Element)) return false;
+
+    const tagName = target.tagName;
+    return tagName === 'INPUT'
+      || tagName === 'TEXTAREA'
+      || tagName === 'SELECT'
+      || target.isContentEditable
+      || target.closest('[contenteditable=""], [contenteditable="true"]');
   }
 
   function openDB() {
@@ -59,8 +89,8 @@
     });
   }
 
-  const OVERLAY_ID = 'overlay-container';
-  const SHADOW_HOST_ID = 'overlay-shadow-host';
+  const OVERLAY_ID = '__overlay_extension_container';
+  const SHADOW_HOST_ID = '__overlay_extension_shadow_host';
   const CONTROLS_ID = 'overlay-controls';
   const storageKey = `overlayState:${window.location.origin}`;
 
@@ -80,18 +110,16 @@
     }
   };
 
-  if (document.getElementById(SHADOW_HOST_ID)) {
-    chrome.storage.local.get(storageKey, (result) => {
-      const liveReloadActive = result[storageKey] && result[storageKey].settings.liveReload;
-      setIconForLiveReloadState(liveReloadActive || false);
-    });
-    document.getElementById(SHADOW_HOST_ID).remove();
-    document.getElementById(OVERLAY_ID).remove();
-    return;
-  }
+  [
+    SHADOW_HOST_ID,
+    OVERLAY_ID,
+    'overlay-shadow-host',
+    'overlay-container'
+  ].forEach((id) => document.getElementById(id)?.remove());
 
   const overlayContainer = document.createElement('div');
   overlayContainer.id = OVERLAY_ID;
+  overlayContainer.dataset.overlayExtension = 'true';
   Object.assign(overlayContainer.style, {
     position: 'absolute',
     top: '0',
@@ -105,8 +133,14 @@
   });
 
   const overlayImage = document.createElement('img');
-  overlayImage.id = 'overlay-image';
+  overlayImage.id = '__overlay_extension_image';
   Object.assign(overlayImage.style, {
+    boxSizing: 'content-box',
+    border: '0',
+    margin: '0',
+    maxHeight: 'none',
+    maxWidth: 'none',
+    padding: '0',
     position: 'absolute',
     transformOrigin: 'top left',
   });
@@ -114,6 +148,7 @@
 
   const shadowHost = document.createElement('div');
   shadowHost.id = SHADOW_HOST_ID;
+  shadowHost.dataset.overlayExtension = 'true';
   document.body.appendChild(shadowHost);
   const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
 
@@ -195,6 +230,33 @@
     controlsHeader: shadowRoot.getElementById('overlay-controls-header'),
     controlsBody: shadowRoot.getElementById('overlay-controls-body')
   };
+
+  const cleanupTasks = [];
+
+  function addEventListenerWithCleanup(target, type, listener, options) {
+    target.addEventListener(type, listener, options);
+    cleanupTasks.push(() => target.removeEventListener(type, listener, options));
+  }
+
+  function destroy() {
+    disconnectLiveReload();
+
+    cleanupTasks.splice(0).forEach((cleanup) => cleanup());
+
+    if (overlayImage.src && overlayImage.src.startsWith('blob:')) {
+      URL.revokeObjectURL(overlayImage.src);
+    }
+
+    Object.values(thumbnailCache).forEach((url) => URL.revokeObjectURL(url));
+    thumbnailCache = {};
+
+    shadowHost.remove();
+    overlayContainer.remove();
+    setIconForLiveReloadState(false);
+    delete window[INSTANCE_KEY];
+  }
+
+  window[INSTANCE_KEY] = { destroy };
 
   function updateOverlayStyle() {
     const activeImage = state.images.find(img => img.id === state.activeImageId);
@@ -490,18 +552,18 @@
     }
   }
 
-  DOMElements.xPos.addEventListener('input', (e) => {
+  addEventListenerWithCleanup(DOMElements.xPos, 'input', (e) => {
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (activeImage) {
-      activeImage.settings.x = parseFloat(e.target.value);
+      activeImage.settings.x = parseNumber(e.target.value);
       updateOverlayStyle();
       saveState();
     }
   });
-  DOMElements.yPos.addEventListener('input', (e) => {
+  addEventListenerWithCleanup(DOMElements.yPos, 'input', (e) => {
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (activeImage) {
-      activeImage.settings.y = parseFloat(e.target.value);
+      activeImage.settings.y = parseNumber(e.target.value);
       updateOverlayStyle();
       saveState();
     }
@@ -511,7 +573,7 @@
     const handler = (e) => {
       const activeImage = state.images.find(img => img.id === state.activeImageId);
       if (activeImage) {
-        const value = parseFloat(e.target.value) || 0;
+        const value = parseNumber(e.target.value);
         activeImage.settings[setting] = value;
         rangeEl.value = value;
         numberEl.value = value;
@@ -519,19 +581,19 @@
         saveState();
       }
     };
-    rangeEl.addEventListener('input', handler);
-    numberEl.addEventListener('input', handler);
+    addEventListenerWithCleanup(rangeEl, 'input', handler);
+    addEventListenerWithCleanup(numberEl, 'input', handler);
   };
 
   setupSyncedInputs('scale', DOMElements.scaleRange, DOMElements.scaleNumber);
   setupSyncedInputs('opacity', DOMElements.opacityRange, DOMElements.opacityNumber);
   setupSyncedInputs('invert', DOMElements.invertRange, DOMElements.invertNumber);
   
-  DOMElements.lockBtn.addEventListener('click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
-  DOMElements.hideBtn.addEventListener('click', () => { state.settings.hidden = !state.settings.hidden; updateOverlayStyle(); saveState(); });
-  DOMElements.minBtn.addEventListener('click', () => { state.panel.minimized = !state.panel.minimized; updateControlsUI(); saveState(); });
+  addEventListenerWithCleanup(DOMElements.lockBtn, 'click', () => { state.settings.locked = !state.settings.locked; updateOverlayStyle(); saveState(); });
+  addEventListenerWithCleanup(DOMElements.hideBtn, 'click', () => { state.settings.hidden = !state.settings.hidden; updateOverlayStyle(); saveState(); });
+  addEventListenerWithCleanup(DOMElements.minBtn, 'click', () => { state.panel.minimized = !state.panel.minimized; updateControlsUI(); saveState(); });
 
-  DOMElements.liveReloadBtn.addEventListener('click', () => {
+  addEventListenerWithCleanup(DOMElements.liveReloadBtn, 'click', () => {
     state.settings.liveReload = !state.settings.liveReload;
     if (state.settings.liveReload) {
       connectLiveReload();
@@ -541,8 +603,8 @@
     saveState();
   });
 
-  DOMElements.uploadBtn.addEventListener('click', () => DOMElements.imageUpload.click());
-  DOMElements.imageUpload.addEventListener('change', (e) => {
+  addEventListenerWithCleanup(DOMElements.uploadBtn, 'click', () => DOMElements.imageUpload.click());
+  addEventListenerWithCleanup(DOMElements.imageUpload, 'change', (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       const reader = new FileReader();
@@ -581,7 +643,7 @@
     }
   });
 
-  overlayImage.addEventListener('mousedown', (e) => {
+  addEventListenerWithCleanup(overlayImage, 'mousedown', (e) => {
     if (state.settings.locked) return;
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (!activeImage) return;
@@ -607,7 +669,7 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  overlayImage.addEventListener('touchstart', (e) => {
+  addEventListenerWithCleanup(overlayImage, 'touchstart', (e) => {
     if (state.settings.locked) return;
     const activeImage = state.images.find(img => img.id === state.activeImageId);
     if (!activeImage) return;
@@ -638,7 +700,7 @@
     document.addEventListener('touchend', onTouchEnd);
   }, { passive: false });
 
-  DOMElements.controlsHeader.addEventListener('mousedown', (e) => {
+  addEventListenerWithCleanup(DOMElements.controlsHeader, 'mousedown', (e) => {
     if (e.target.tagName === 'BUTTON') return;
     e.preventDefault();
     const rect = controls.getBoundingClientRect();
@@ -672,7 +734,7 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
-  DOMElements.controlsHeader.addEventListener('touchstart', (e) => {
+  addEventListenerWithCleanup(DOMElements.controlsHeader, 'touchstart', (e) => {
     if (e.target.tagName === 'BUTTON') return;
 
     if (e.touches.length !== 1) return;
@@ -712,8 +774,8 @@
     document.addEventListener('touchend', onTouchEnd);
   }, { passive: false });
 
-  document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT') return;
+  addEventListenerWithCleanup(document, 'keydown', (e) => {
+    if (isEditableTarget(e.target)) return;
 
     if (!state.activeImageId || state.settings.locked) return;
 

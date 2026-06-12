@@ -16,12 +16,6 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "content_scripts": [
-    {
-      "css": ["overlay.css"],
-      "matches": ["<all_urls>"]
-    }
-  ],
   "web_accessible_resources": [
     {
       "resources": ["overlay.css", "fonts/SpaceMono-Regular.woff2"],
